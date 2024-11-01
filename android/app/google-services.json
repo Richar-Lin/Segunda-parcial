@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269606081040",
+    "project_id": "fpune2024-d9bf8",
+    "storage_bucket": "fpune2024-d9bf8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269606081040:android:561bca9ba2bfe30a567095",
+        "android_client_info": {
+          "package_name": "com.fpune"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8U26I1X7i0bEm9hW3Y3C6w2FC77Z8s4M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
