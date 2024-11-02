@@ -25,27 +25,7 @@ const Home = ({navigation}) => {
         <ListItem.Content >
           <ListItem.Title>Progreso Diario</ListItem.Title>
         </ListItem.Content>
-      </ListItem>   
-      <ListItem bottomDivider onPress={() => navigation.navigate('FirebaseLeer')}>
-        <ListItem.Content >
-          <ListItem.Title>Firebase Leer</ListItem.Title>
-        </ListItem.Content>
-      </ListItem>   
-      <ListItem bottomDivider onPress={() => navigation.navigate('FirebaseGuardar')}>
-        <ListItem.Content >
-          <ListItem.Title>Firebase Guardar</ListItem.Title>
-        </ListItem.Content>
-      </ListItem>    
-      <ListItem bottomDivider onPress={() => navigation.navigate('FirebaseBorrar')}>
-        <ListItem.Content >
-          <ListItem.Title>Firebase Borrar</ListItem.Title>
-        </ListItem.Content>
-      </ListItem>          
-      <ListItem bottomDivider onPress={() => navigation.navigate('FirebaseEditar')}>
-        <ListItem.Content >
-          <ListItem.Title>Firebase Editar</ListItem.Title>
-        </ListItem.Content>
-      </ListItem>                                               
+      </ListItem>                                                 
     </ScrollView>
   )
 }
