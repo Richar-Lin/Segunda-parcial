@@ -1,42 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Switch, ScrollView, Platform, PermissionsAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification';
 import { Picker } from '@react-native-picker/picker';
-
-// Initialize PushNotification
-PushNotification.configure({
-  onNotification: function (notification) {
-    console.log('NOTIFICATION:', notification);
-  },
-  permissions: {
-    alert: true,
-    badge: true,
-    sound: true,
-  },
-  popInitialNotification: true,
-  requestPermissions: true,
-});
-
-// Create a notification channel for Android
-PushNotification.createChannel(
-  {
-    channelId: "wellness-reminders",
-    channelName: "Wellness Reminders",
-    channelDescription: "A channel to categorize your wellness notifications",
-    playSound: true,
-    soundName: "default",
-    importance: PushNotification.Importance.HIGH,
-    vibrate: true,
-  },
-  (created) => {
-    console.log(`createChannel returned '${created}'`);
-    if (!created) {
-      console.error('Failed to create the channel.');
-    }
-  }
-);
 
 const reminderTypes = [
   { id: 'activeBreaks', title: 'Pausas Activas', description: 'Recordatorios para levantarte y moverte' },
@@ -54,8 +21,54 @@ const frequencyOptions = [
 
 const WellnessRemindersView = () => {
   const [reminders, setReminders] = useState({});
-  
+
   useEffect(() => {
+    // Solicitar permisos de notificaciones en Android 13+
+    const requestNotificationPermission = async () => {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.warn("Permission for notifications not granted");
+        }
+      }
+    };
+    requestNotificationPermission();
+
+    // Configurar y crear el canal de notificación
+    PushNotification.configure({
+      onNotification: function (notification) {
+        console.log('NOTIFICATION:', notification);
+      },
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true,
+      },
+      popInitialNotification: true,
+      requestPermissions: true,
+    });
+
+    PushNotification.createChannel(
+      {
+        channelId: "wellness-reminders-new", // Cambia el ID temporalmente para probar
+        channelName: "Wellness Reminders",
+        channelDescription: "A channel to categorize your wellness notifications",
+        playSound: true,
+        soundName: "default",
+        importance: PushNotification.Importance.HIGH,
+        vibrate: true,
+      },
+      (created) => {
+        console.log(`createChannel returned '${created}'`);
+        if (!created) {
+          console.error('Failed to create the channel. It may already exist.');
+        }
+      }
+    );
+
+
     loadReminders();
   }, []);
 
@@ -66,7 +79,7 @@ const WellnessRemindersView = () => {
         setReminders(JSON.parse(savedReminders));
       } else {
         const defaultReminders = reminderTypes.reduce((acc, type) => {
-          acc[type.id] = { enabled: false, frequency: 60, specificTime: null }; // Default frequency to 1 hour
+          acc[type.id] = { enabled: false, frequency: 60, specificTime: null };
           return acc;
         }, {});
         setReminders(defaultReminders);
@@ -203,7 +216,7 @@ const styles = StyleSheet.create({
   },
   reminderInfo: {
     flex: 1,
-    marginRight: 10, // Adding some space between picker and switch
+    marginRight: 10,
   },
   reminderTitle: {
     fontSize: 18,
