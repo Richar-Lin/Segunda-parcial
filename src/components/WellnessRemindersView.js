@@ -1,22 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView, Platform, PermissionsAndroid } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  ScrollView,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PushNotification from 'react-native-push-notification';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
+import notifee, {
+  AndroidImportance,
+  TriggerType,
+  TimeUnit,
+} from '@notifee/react-native';
 
 const reminderTypes = [
-  { id: 'activeBreaks', title: 'Pausas Activas', description: 'Recordatorios para levantarte y moverte' },
-  { id: 'breathing', title: 'Ejercicios de Respiración', description: 'Alertas para practicar respiración profunda' },
-  { id: 'meditation', title: 'Meditación', description: 'Recordatorios para meditar y relajarte' },
+  {
+    id: 'activeBreaks',
+    title: 'Pausas Activas',
+    description: 'Recordatorios para levantarte y moverte',
+  },
+  {
+    id: 'breathing',
+    title: 'Ejercicios de Respiración',
+    description: 'Alertas para practicar respiración profunda',
+  },
+  {
+    id: 'meditation',
+    title: 'Meditación',
+    description: 'Recordatorios para meditar y relajarte',
+  },
 ];
 
 const frequencyOptions = [
-  { label: 'Cada hora', value: 60 },
-  { label: 'Cada 2 horas', value: 120 },
-  { label: 'Cada 4 horas', value: 240 },
-  { label: 'Cada 8 horas', value: 480 },
-  { label: 'Diariamente', value: 1440 },
+  {label: 'Cada hora', value: 60},
+  {label: 'Cada 2 horas', value: 120},
+  {label: 'Cada 4 horas', value: 240},
+  {label: 'Cada 8 horas', value: 480},
+  {label: 'Diariamente', value: 1440},
 ];
 
 const WellnessRemindersView = () => {
@@ -27,49 +51,31 @@ const WellnessRemindersView = () => {
     const requestNotificationPermission = async () => {
       if (Platform.OS === 'android' && Platform.Version >= 33) {
         const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
         );
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          console.warn("Permission for notifications not granted");
+          console.warn('Permission for notifications not granted');
         }
       }
     };
-    requestNotificationPermission();
 
-    // Configurar y crear el canal de notificación
-    PushNotification.configure({
-      onNotification: function (notification) {
-        console.log('NOTIFICATION:', notification);
-      },
-      permissions: {
-        alert: true,
-        badge: true,
-        sound: true,
-      },
-      popInitialNotification: true,
-      requestPermissions: true,
-    });
+    // Crear el canal de notificación
+    const createChannelNotifee = async () => {
+      await notifee.createChannel({
+        id: 'default',
+        name: 'Default Channel',
+        importance: AndroidImportance.HIGH,
+      });
+      console.log('Notification channel created');
+    };
 
-    PushNotification.createChannel(
-      {
-        channelId: "wellness-reminders-new", // Cambia el ID temporalmente para probar
-        channelName: "Wellness Reminders",
-        channelDescription: "A channel to categorize your wellness notifications",
-        playSound: true,
-        soundName: "default",
-        importance: PushNotification.Importance.HIGH,
-        vibrate: true,
-      },
-      (created) => {
-        console.log(`createChannel returned '${created}'`);
-        if (!created) {
-          console.error('Failed to create the channel. It may already exist.');
-        }
-      }
-    );
+    const initializeNotifications = async () => {
+      await requestNotificationPermission(); // Llama a la función de permiso
+      await createChannelNotifee(); // Crea el canal de notificación
+      loadReminders(); // Cargar recordatorios o cualquier otra función adicional
+    };
 
-
-    loadReminders();
+    initializeNotifications();
   }, []);
 
   const loadReminders = async () => {
@@ -79,7 +85,7 @@ const WellnessRemindersView = () => {
         setReminders(JSON.parse(savedReminders));
       } else {
         const defaultReminders = reminderTypes.reduce((acc, type) => {
-          acc[type.id] = { enabled: false, frequency: 60, specificTime: null };
+          acc[type.id] = {enabled: false, frequency: 60, specificTime: null};
           return acc;
         }, {});
         setReminders(defaultReminders);
@@ -89,19 +95,22 @@ const WellnessRemindersView = () => {
     }
   };
 
-  const saveReminders = async (newReminders) => {
+  const saveReminders = async newReminders => {
     try {
-      await AsyncStorage.setItem('wellnessReminders', JSON.stringify(newReminders));
+      await AsyncStorage.setItem(
+        'wellnessReminders',
+        JSON.stringify(newReminders),
+      );
     } catch (error) {
       console.error('Error saving reminders:', error);
     }
   };
 
-  const toggleReminder = (id) => {
+  const toggleReminder = id => {
     if (reminders[id] === undefined) return;
     const newReminders = {
       ...reminders,
-      [id]: { ...reminders[id], enabled: !reminders[id].enabled }
+      [id]: {...reminders[id], enabled: !reminders[id].enabled},
     };
     setReminders(newReminders);
     saveReminders(newReminders);
@@ -113,33 +122,44 @@ const WellnessRemindersView = () => {
     }
   };
 
-  const scheduleNotification = (id) => {
+  const scheduleNotification = async id => {
     const reminder = reminders[id];
     const title = `Recordatorio de ${getReminderTitle(id)}`;
     const message = `Es hora de tu ${getReminderTitle(id).toLowerCase()}`;
 
-    const date = new Date(Date.now() + reminder.frequency + 5 * 1000);
+    console.log('frequency: ', reminder.frequency);
 
-    PushNotification.localNotificationSchedule({
-      channelId: "wellness-reminders-new",
-      id: id,
-      title,
-      message,
-      date,
-      allowWhileIdle: true,
-      repeatType: 'time',
-      repeatTime: reminder.frequency * 60 * 1000,
-    });
+    // Disparador para la notificación programada
+    const trigger = {
+      type: TriggerType.INTERVAL,
+      interval: reminder.frequency,
+      timeUnit: TimeUnit.MINUTES,
+    };
 
-    console.log(`Notification scheduled for ${id} at ${date.toLocaleString()}`);
+    // Crear la notificación programada
+    await notifee.createTriggerNotification(
+      {
+        title: title,
+        body: message,
+        android: {
+          channelId: 'default',
+          importance: AndroidImportance.HIGH,
+        },
+      },
+      trigger, // Usar el disparador configurado
+    );
+
+    console.log(
+      `Notificación programada para ${id} para dentro de ${reminder.frequency} minutos`,
+    );
   };
 
-  const cancelNotification = (id) => {
-    PushNotification.cancelLocalNotification(id);
+  const cancelNotification = async id => {
+    await notifee.cancelNotification(id);
     console.log(`Notification cancelled for ${id}`);
   };
 
-  const getReminderTitle = (id) => {
+  const getReminderTitle = id => {
     return reminderTypes.find(type => type.id === id)?.title || '';
   };
 
@@ -149,7 +169,7 @@ const WellnessRemindersView = () => {
       [id]: {
         ...reminders[id],
         frequency: value,
-      }
+      },
     };
     setReminders(newReminders);
     saveReminders(newReminders);
@@ -163,7 +183,7 @@ const WellnessRemindersView = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Recordatorios de Bienestar</Text>
-        {reminderTypes.map((type) => (
+        {reminderTypes.map(type => (
           <View key={type.id} style={styles.reminderItem}>
             <View style={styles.reminderInfo}>
               <Text style={styles.reminderTitle}>{type.title}</Text>
@@ -171,10 +191,15 @@ const WellnessRemindersView = () => {
               <Picker
                 selectedValue={reminders[type.id]?.frequency}
                 style={styles.picker}
-                onValueChange={(itemValue) => handleFrequencyChange(type.id, itemValue)}
-              >
-                {frequencyOptions.map((option) => (
-                  <Picker.Item key={option.value} label={option.label} value={option.value} />
+                onValueChange={itemValue =>
+                  handleFrequencyChange(type.id, itemValue)
+                }>
+                {frequencyOptions.map(option => (
+                  <Picker.Item
+                    key={option.value}
+                    label={option.label}
+                    value={option.value}
+                  />
                 ))}
               </Picker>
             </View>
@@ -193,7 +218,7 @@ const WellnessRemindersView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#6d8cbd',
   },
   scrollContent: {
     padding: 20,
