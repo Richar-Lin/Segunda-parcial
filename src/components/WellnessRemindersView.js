@@ -118,10 +118,10 @@ const WellnessRemindersView = () => {
     const title = `Recordatorio de ${getReminderTitle(id)}`;
     const message = `Es hora de tu ${getReminderTitle(id).toLowerCase()}`;
 
-    const date = new Date(Date.now() + reminder.frequency * 60 * 1000);
+    const date = new Date(Date.now() + reminder.frequency + 5 * 1000);
 
     PushNotification.localNotificationSchedule({
-      channelId: "wellness-reminders",
+      channelId: "wellness-reminders-new",
       id: id,
       title,
       message,

@@ -5,12 +5,7 @@ import { ScrollView} from 'react-native'
 const Home = ({navigation}) => {
 
   return (
-    <ScrollView>
-      <ListItem bottomDivider onPress={() => navigation.navigate('FirebaseLogin')}>
-        <ListItem.Content >
-          <ListItem.Title>Login con Firebase</ListItem.Title>
-        </ListItem.Content>
-      </ListItem>       
+    <ScrollView>     
       <ListItem bottomDivider onPress={() => navigation.navigate('WellnessRemindersView')}>
         <ListItem.Content >
           <ListItem.Title>Recordatorio</ListItem.Title>
@@ -25,7 +20,12 @@ const Home = ({navigation}) => {
         <ListItem.Content >
           <ListItem.Title>Progreso Diario</ListItem.Title>
         </ListItem.Content>
-      </ListItem>                                                 
+      </ListItem>             
+      <ListItem bottomDivider onPress={() => navigation.navigate('WeeklyProgressView')}>
+        <ListItem.Content >
+          <ListItem.Title>Estadistica Semanal y Mensual</ListItem.Title>
+        </ListItem.Content>
+      </ListItem>                                       
     </ScrollView>
   )
 }
