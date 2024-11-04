@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ImageBackground, KeyboardAvoidingView, Platform } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import auth from '@react-native-firebase/auth';
-import Svg, { Path } from 'react-native-svg';
-import { Button, Input, Text } from '@rneui/themed';
-import { Dumbbell } from 'lucide-react-native';
+import {Button, Input, Text} from '@rneui/themed';
+import {Dumbbell} from 'lucide-react-native';
+import logo from '../assets/logo.png';
+import { Image } from '@rneui/base';
 
-const FirebaseLogin = ({ navigation }) => {
+const FirebaseLogin = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -15,28 +22,26 @@ const FirebaseLogin = ({ navigation }) => {
       console.log('Inicio de sesión exitoso');
       navigation.navigate('Home');
     } catch (error) {
-      console.error("Error al iniciar sesión: ", error.message);
+      console.error('Error al iniciar sesión: ', error.message);
     }
   };
 
   return (
     <ImageBackground
-      source={{ uri: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=80' }}
-      style={styles.backgroundImage}
-    >
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
+      source={{
+        uri: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=80',
+      }}
+      style={styles.backgroundImage}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}>
         <View style={styles.overlay}>
           <View style={styles.logoContainer}>
-            <Dumbbell size={60} color="#ffffff" />
-            <Text h2 style={styles.title}>FitnessPro</Text>
+            <Image source={logo} style={styles.logo} />
           </View>
-          
           <Input
             placeholder="Correo Electrónico"
-            leftIcon={{ type: 'material', name: 'email', color: '#ffffff' }}
+            leftIcon={{type: 'material', name: 'email', color: '#ffffff'}}
             inputStyle={styles.inputText}
             inputContainerStyle={styles.inputContainer}
             value={email}
@@ -44,10 +49,10 @@ const FirebaseLogin = ({ navigation }) => {
             autoCapitalize="none"
             keyboardType="email-address"
           />
-          
+
           <Input
             placeholder="Contraseña"
-            leftIcon={{ type: 'material', name: 'lock', color: '#ffffff' }}
+            leftIcon={{type: 'material', name: 'lock', color: '#ffffff'}}
             inputStyle={styles.inputText}
             inputContainerStyle={styles.inputContainer}
             value={password}
@@ -55,23 +60,23 @@ const FirebaseLogin = ({ navigation }) => {
             secureTextEntry
           />
 
-          <Button 
-            title="Iniciar Sesión" 
-            buttonStyle={styles.loginButton} 
+          <Button
+            title="Iniciar Sesión"
+            buttonStyle={styles.loginButton}
             onPress={handleLogin}
             titleStyle={styles.buttonText}
           />
 
           <View style={styles.linkContainer}>
-            <Button 
-              title="Crear Cuenta" 
-              type="clear" 
+            <Button
+              title="Crear Cuenta"
+              type="clear"
               onPress={() => navigation.navigate('FirebaseCrearCuenta')}
               titleStyle={styles.linkText}
             />
-            <Button 
-              title="Recuperar Contraseña" 
-              type="clear" 
+            <Button
+              title="Recuperar Contraseña"
+              type="clear"
               onPress={() => navigation.navigate('FirebaseRecuperarCuenta')}
               titleStyle={styles.linkText}
             />
@@ -101,6 +106,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 50,
   },
+  logo: {
+    width: 250, // Ajusta el tamaño según lo necesites
+    height: 250,
+    resizeMode: 'contain', // Escala la imagen manteniendo las proporciones
+  },
   title: {
     color: '#ffffff',
     marginTop: 10,
@@ -113,7 +123,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   loginButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#045d5b',
     borderRadius: 25,
     marginTop: 20,
     paddingVertical: 15,

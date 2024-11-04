@@ -7,6 +7,7 @@ import {
   ScrollView,
   Platform,
   PermissionsAndroid,
+  ImageBackground,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,6 +17,7 @@ import notifee, {
   TriggerType,
   TimeUnit,
 } from '@notifee/react-native';
+import fondo from '../assets/fondo_tabs.png';
 
 const reminderTypes = [
   {
@@ -139,6 +141,7 @@ const WellnessRemindersView = () => {
     // Crear la notificación programada
     await notifee.createTriggerNotification(
       {
+        id: id,
         title: title,
         body: message,
         android: {
@@ -156,7 +159,7 @@ const WellnessRemindersView = () => {
 
   const cancelNotification = async id => {
     await notifee.cancelNotification(id);
-    console.log(`Notification cancelled for ${id}`);
+    console.log(`Notification with id ${id} canceled`);
   };
 
   const getReminderTitle = id => {
@@ -180,45 +183,52 @@ const WellnessRemindersView = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Recordatorios de Bienestar</Text>
-        {reminderTypes.map(type => (
-          <View key={type.id} style={styles.reminderItem}>
-            <View style={styles.reminderInfo}>
-              <Text style={styles.reminderTitle}>{type.title}</Text>
-              <Text style={styles.reminderDescription}>{type.description}</Text>
-              <Picker
-                selectedValue={reminders[type.id]?.frequency}
-                style={styles.picker}
-                onValueChange={itemValue =>
-                  handleFrequencyChange(type.id, itemValue)
-                }>
-                {frequencyOptions.map(option => (
-                  <Picker.Item
-                    key={option.value}
-                    label={option.label}
-                    value={option.value}
-                  />
-                ))}
-              </Picker>
+    <ImageBackground source={fondo} style={styles.backgroundImage}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Text style={styles.title}>Recordatorios de Bienestar</Text>
+          {reminderTypes.map(type => (
+            <View key={type.id} style={styles.reminderItem}>
+              <View style={styles.reminderInfo}>
+                <Text style={styles.reminderTitle}>{type.title}</Text>
+                <Text style={styles.reminderDescription}>
+                  {type.description}
+                </Text>
+                <Picker
+                  selectedValue={reminders[type.id]?.frequency}
+                  style={styles.picker}
+                  onValueChange={itemValue =>
+                    handleFrequencyChange(type.id, itemValue)
+                  }>
+                  {frequencyOptions.map(option => (
+                    <Picker.Item
+                      key={option.value}
+                      label={option.label}
+                      value={option.value}
+                    />
+                  ))}
+                </Picker>
+              </View>
+              <Switch
+                value={Boolean(reminders[type.id]?.enabled)}
+                onValueChange={() => toggleReminder(type.id)}
+                accessibilityLabel={`Activar recordatorios de ${type.title}`}
+              />
             </View>
-            <Switch
-              value={Boolean(reminders[type.id]?.enabled)}
-              onValueChange={() => toggleReminder(type.id)}
-              accessibilityLabel={`Activar recordatorios de ${type.title}`}
-            />
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#6d8cbd',
   },
   scrollContent: {
     padding: 20,
@@ -228,12 +238,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: 'white',
   },
   reminderItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,

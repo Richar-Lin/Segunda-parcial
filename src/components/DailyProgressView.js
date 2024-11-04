@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  FlatList,
+  ImageBackground,
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import fondo from '../assets/fondo_tabs.png';
 
-const DailyProgressView = ({ navigation }) => {
+const DailyProgressView = ({navigation}) => {
   const [sleepHours, setSleepHours] = useState('');
   const [exerciseHours, setExerciseHours] = useState('');
   const [calories, setCalories] = useState('');
@@ -26,7 +36,7 @@ const DailyProgressView = ({ navigation }) => {
         .orderBy('timestamp', 'desc')
         .get();
 
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
       setProgressList(data);
     } catch (error) {
       console.error('Error fetching progress data:', error);
@@ -48,22 +58,27 @@ const DailyProgressView = ({ navigation }) => {
     try {
       if (editingId) {
         // Update the existing document
-        await firestore().collection('dailyProgress').doc(editingId).update({
-          sleepHours: parseFloat(sleepHours),
-          exerciseHours: parseFloat(exerciseHours),
-          calories: parseInt(calories),
-        });
+        await firestore()
+          .collection('dailyProgress')
+          .doc(editingId)
+          .update({
+            sleepHours: parseFloat(sleepHours),
+            exerciseHours: parseFloat(exerciseHours),
+            calories: parseInt(calories),
+          });
         Alert.alert('Éxito', 'El progreso ha sido actualizado');
       } else {
         // Add a new document
-        await firestore().collection('dailyProgress').add({
-          userId: user.uid,
-          date: new Date().toISOString().split('T')[0],
-          sleepHours: parseFloat(sleepHours),
-          exerciseHours: parseFloat(exerciseHours),
-          calories: parseInt(calories),
-          timestamp: firestore.FieldValue.serverTimestamp(),
-        });
+        await firestore()
+          .collection('dailyProgress')
+          .add({
+            userId: user.uid,
+            date: new Date().toISOString().split('T')[0],
+            sleepHours: parseFloat(sleepHours),
+            exerciseHours: parseFloat(exerciseHours),
+            calories: parseInt(calories),
+            timestamp: firestore.FieldValue.serverTimestamp(),
+          });
         Alert.alert('Éxito', 'Tu progreso diario ha sido guardado');
       }
 
@@ -74,93 +89,111 @@ const DailyProgressView = ({ navigation }) => {
       fetchProgressData();
     } catch (error) {
       console.error('Error al guardar el progreso:', error);
-      Alert.alert('Error', 'No se pudo guardar el progreso. Por favor, intenta de nuevo.');
+      Alert.alert(
+        'Error',
+        'No se pudo guardar el progreso. Por favor, intenta de nuevo.',
+      );
     }
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = item => {
     setSleepHours(item.sleepHours.toString());
     setExerciseHours(item.exerciseHours.toString());
     setCalories(item.calories.toString());
     setEditingId(item.id);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     try {
       await firestore().collection('dailyProgress').doc(id).delete();
       Alert.alert('Éxito', 'El progreso ha sido eliminado');
       fetchProgressData();
     } catch (error) {
       console.error('Error al eliminar el progreso:', error);
-      Alert.alert('Error', 'No se pudo eliminar el progreso. Por favor, intenta de nuevo.');
+      Alert.alert(
+        'Error',
+        'No se pudo eliminar el progreso. Por favor, intenta de nuevo.',
+      );
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Progreso Diario</Text>
+    <ImageBackground source={fondo} style={styles.backgroundImage}>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.title}>Progreso Diario</Text>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Horas de sueño:</Text>
-        <TextInput
-          style={styles.input}
-          value={sleepHours}
-          onChangeText={setSleepHours}
-          placeholder="Ej: 8"
-          keyboardType="numeric"
-          accessibilityLabel="Ingresa las horas de sueño"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Horas de sueño:</Text>
+          <TextInput
+            style={styles.input}
+            value={sleepHours}
+            onChangeText={setSleepHours}
+            placeholder="Ej: 8"
+            keyboardType="numeric"
+            accessibilityLabel="Ingresa las horas de sueño"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Horas de ejercicio:</Text>
-        <TextInput
-          style={styles.input}
-          value={exerciseHours}
-          onChangeText={setExerciseHours}
-          placeholder="Ej: 1.5"
-          keyboardType="numeric"
-          accessibilityLabel="Ingresa las horas de ejercicio"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Horas de ejercicio:</Text>
+          <TextInput
+            style={styles.input}
+            value={exerciseHours}
+            onChangeText={setExerciseHours}
+            placeholder="Ej: 1.5"
+            keyboardType="numeric"
+            accessibilityLabel="Ingresa las horas de ejercicio"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Calorías consumidas:</Text>
-        <TextInput
-          style={styles.input}
-          value={calories}
-          onChangeText={setCalories}
-          placeholder="Ej: 2000"
-          keyboardType="numeric"
-          accessibilityLabel="Ingresa las calorías consumidas"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Calorías consumidas:</Text>
+          <TextInput
+            style={styles.input}
+            value={calories}
+            onChangeText={setCalories}
+            placeholder="Ej: 2000"
+            keyboardType="numeric"
+            accessibilityLabel="Ingresa las calorías consumidas"
+          />
+        </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>{editingId ? 'Editar Progreso' : 'Guardar Progreso'}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>
+            {editingId ? 'Editar Progreso' : 'Guardar Progreso'}
+          </Text>
+        </TouchableOpacity>
 
-      <FlatList
-        data={progressList}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.progressItem}>
-            <Text style={styles.progressText}>Fecha: {item.date}</Text>
-            <Text style={styles.progressText}>Sueño: {item.sleepHours} hrs</Text>
-            <Text style={styles.progressText}>Ejercicio: {item.exerciseHours} hrs</Text>
-            <Text style={styles.progressText}>Calorías: {item.calories}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
-                <Text style={styles.buttonText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
-                <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
+        <FlatList
+          data={progressList}
+          keyExtractor={item => item.id}
+          renderItem={({item}) => (
+            <View style={styles.progressItem}>
+              <Text style={styles.progressText}>Fecha: {item.date}</Text>
+              <Text style={styles.progressText}>
+                Sueño: {item.sleepHours} hrs
+              </Text>
+              <Text style={styles.progressText}>
+                Ejercicio: {item.exerciseHours} hrs
+              </Text>
+              <Text style={styles.progressText}>Calorías: {item.calories}</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => handleEdit(item)}>
+                  <Text style={styles.buttonText}>Editar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDelete(item.id)}>
+                  <Text style={styles.buttonText}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      />
-    </SafeAreaView>
+          )}
+        />
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
@@ -168,13 +201,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: 'white',
   },
   inputContainer: {
     marginBottom: 20,
@@ -183,15 +220,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
     fontWeight: '600',
+    color: 'white',
   },
   input: {
-    backgroundColor: 'white',
     borderRadius: 5,
     padding: 10,
     fontSize: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#045d5b',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
@@ -203,7 +241,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   progressItem: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,
@@ -218,7 +256,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   editButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FABF07',
     padding: 10,
     borderRadius: 5,
   },
